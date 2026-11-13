@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Transport Remote</title>
+  <style>
+    /* Mirrors LUNA's transport bar, scaled up: big counter and buttons that light white
+       (record: red), LUNA's "pumpkin spice" accent (255,197,74), Start/Stop/Length fields. */
+    :root {
+      color-scheme: dark;
+      --bg: #23272a; --field: #181b1d;
+      --btn-off: #8d969b; --btn-on: #ffffff; --btn-rec: #ff5a5a;
+      --icon: #12333f; --text: #ffffff; --dim: #a1adb3; --accent: #ffc54a; --sep: #525759;
+      --u: min(1vw, 1.6vh); /* everything scales with the window */
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden;
+           font: calc(var(--u) * 1.6) Oxygen, -apple-system, "Segoe UI", Helvetica, sans-serif; user-select: none; }
+    #bar { display: flex; flex-direction: column; gap: calc(var(--u) * 1.5); padding: calc(var(--u) * 1.5); height: 100%; }
+    #readout { display: flex; flex-direction: column; justify-content: center; align-items: center; flex: 1.3; min-height: 0;
+               background: var(--field); border-radius: calc(var(--u) * 1.2); }
+    #location { font-size: calc(var(--u) * 10); line-height: 1.05; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    #tempo { font-size: calc(var(--u) * 3.2); color: var(--text); white-space: nowrap; }
+    #buttons { display: flex; gap: calc(var(--u) * 1.5); flex: 1.3; min-height: 0; }
+    .tbtn { flex: 1; min-width: 0; border: 0; border-radius: calc(var(--u) * 1.2); cursor: pointer; background: var(--btn-off);
+            display: grid; place-items: center; padding: 0; }
+    .tbtn svg { width: 45%; height: 45%; max-height: calc(var(--u) * 9); fill: var(--icon); }
+    .tbtn:hover { opacity: .75; } .tbtn:active { opacity: .55; }
+    .tbtn.on { background: var(--btn-on); box-shadow: 0 0 calc(var(--u) * 2) rgba(255,255,255,.35); }
+    #record svg { fill: #e5202b; }
+    #record.on { background: var(--btn-on); box-shadow: 0 0 calc(var(--u) * 2) rgba(255,70,70,.8); }
+    #fields { display: flex; gap: calc(var(--u) * 1.5); align-items: stretch; flex: .8; min-height: 0; }
+    .field { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; align-items: center;
+             background: var(--field); border-radius: calc(var(--u) * 1.2); }
+    .field label { font-size: calc(var(--u) * 2.6); font-weight: 700; color: var(--dim); text-transform: uppercase; letter-spacing: .08em; }
+    .field input { width: 100%; background: transparent; border: 0; outline: 0; text-align: center; color: var(--text);
+                   font: calc(var(--u) * 5.2) Oxygen, -apple-system, sans-serif; font-variant-numeric: tabular-nums; user-select: text; }
+    .field input:hover { color: #ffe6b1; }
+    .field input:focus { color: var(--accent); }
+    .field:focus-within { outline: 2px solid var(--accent); }
+        #modes { display: flex; gap: 3px; margin-bottom: calc(var(--u) * .8); }
+    #modes button { font: inherit; font-size: calc(var(--u) * 2.8); font-weight: 700; color: var(--text); background: #2f3437; border: 2px solid var(--sep);
+                    padding: calc(var(--u) * .7) calc(var(--u) * 2.2); cursor: pointer; }
+    #modes button:first-child { border-radius: 10px 0 0 10px; } #modes button:last-child { border-radius: 0 10px 10px 0; }
+    #modes button:hover { color: #ffe6b1; }
+    #modes button.on { background: var(--btn-on); color: var(--icon); border-color: var(--btn-on); }
+    #status { position: fixed; right: calc(var(--u) * 2.5); top: calc(var(--u) * 2.2); font-size: calc(var(--u) * 3.4); font-weight: 700; color: var(--text); max-width: 26vw; text-align: right;
+              overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    #status:hover { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <div id="bar">
+    <div id="readout">
+      <div id="modes" role="group" aria-label="Counter display">
+        <button data-mode="bars">Bars</button><button data-mode="time">Min:Sec</button><button data-mode="samples">Samples</button>
+      </div>
+      <div id="location">-|-|---</div>
+      <div id="tempo"></div>
+    </div>
+    <div id="buttons">
+    <button class="tbtn" id="rewind" title="Return to zero" aria-label="Return to zero">
+      <svg viewBox="0 0 20 20"><rect x="3" y="3" width="3" height="14"/><path d="M17 3v14L7 10z"/></svg>
+    </button>
+    <button class="tbtn" id="play" title="Play / Stop" aria-label="Play">
+      <svg viewBox="0 0 20 20"><path d="M5 2.5v15L18 10z"/></svg>
+    </button>
+    <button class="tbtn" id="record" title="Record" aria-label="Record">
+      <svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="7"/></svg>
+    </button>
+    <button class="tbtn" id="loop" title="Loop" aria-label="Loop">
+      <svg viewBox="0 0 20 20"><path d="M4 8a4 4 0 0 1 4-4h5V2l4 3.5L13 9V7H8a1 1 0 0 0-1 1v1H4zm12 4a4 4 0 0 1-4 4H7v2l-4-3.5L7 11v2h5a1 1 0 0 0 1-1v-1h3z"/></svg>
+    </button>
+    </div>
+    <div id="fields">
+      <div class="field"><label for="start">Start</label><input id="start" value="-|-|---" spellcheck="false"></div>
+      <div class="field"><label for="stop">Stop</label><input id="stop" value="-|-|---" spellcheck="false"></div>
+      <div class="field"><label for="length">Length</label><input id="length" value="-|-|---" spellcheck="false"></div>
+    </div>
+    <div id="status">connecting...</div>
+  </div>
+  <script src="vendor/luna.global.js"></script>
+  <script src="logic.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+{
+    "package_name": "Transport Remote",
+    "id": "com.example.transport_remote",
+    "title": "Transport Remote",
+    "manufacturer": "fwilson",
+    "version": "0.1.0",
+    "description": "A remote control window for LUNA's transport: play, stop and record.",
+    "categories": [
+        "Recording",
+        "Utility"
+    ],
+    "sdk_version": "3.1.1.53",
+    "min_luna_version": "3.1.1",
+    "engines": [
+        "luna"
+    ],
+    "html": "index.html",
+    "target": "window",
+    "floating": true,
+    "show_with_session": true,
+    "width": 760,
+    "height": 480
+}
