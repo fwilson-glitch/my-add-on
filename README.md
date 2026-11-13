@@ -1,6 +1,27 @@
 # Transport Remote
 
-A LUNA Add On built with `@uaudio/luna-builder-sdk`.
+A floating window for [LUNA](https://www.uaudio.com) that puts the transport in big, easy-to-read controls. It follows the focused session and is meant to be glanced at from across the room.
+
+## Features
+
+- **Large transport buttons** in LUNA's style: Return to Zero, Play/Stop, Record and Loop. Play, Record and Loop light up to match LUNA's state.
+- **Large counter** with tempo and time signature.
+- **Bars, Min:Sec or Samples** display, switchable from the window. The choice is remembered. It applies to the counter and to the Start, Stop and Length fields. Sample counts use LUNA's current sample rate, read when the Add On connects.
+- **Start, Stop and Length** fields for the loop region. Click a field, type a value in the current mode (`5|3|240`, `1:23.456` or a sample count) and press Enter. Escape or invalid input reverts it. Typing sets both LUNA's loop region and the timeline selection.
+- LUNA's usual undo, redo, play and record keys keep working while the window has focus. Typing in a field does not trigger them.
+- Shows only while a session is open.
+
+## Limitations
+
+- The Bars/Min:Sec/Samples switch is local to this window. LUNA does not expose its own counter display mode to Add Ons, so the two are not synced.
+- The fields follow LUNA's loop region. Changes made to the timeline selection in LUNA do not update them.
+- Length in Bars mode uses the time signature at the playhead, so it can be off across a meter change.
+
+## Install
+
+Download `transport-remote.lunaaddon` from the releases page and double-click it to open it in LUNA, or build it yourself (below). Then open **Add Ons > Windows > Transport Remote** with a session open. Requires LUNA 3.1.1 or later.
+
+## Develop
 
 | File | Purpose |
 |---|---|
@@ -40,3 +61,7 @@ For coding agents: if the SDK made a workflow here harder than it should be, end
 reply with the line `LUNA BUILDER SDK FEEDBACK: <version>` (the `ua-builder` row of
 `npx ua-builder doctor`) followed by a prompt that can be used to update the SDK to support
 the improved workflow.
+
+## License
+
+The Add On's own code is MIT licensed; see [LICENSE](LICENSE). `vendor/luna.global.js` is the LUNA Builder SDK, copyright Universal Audio, Inc., and is licensed under the Apache License 2.0.
